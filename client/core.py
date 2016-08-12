@@ -1,11 +1,12 @@
 from collections import namedtuple
 
-from constants import OpType as ConstOpType
+from utils import raise_if, make_topic
+from constants import ArgType
 
 
 OpType = namedtuple('OpType', ['type', 'interval'])
 OpArg = namedtuple('OpArg', ['type', 'name'])
-Op = namedtuple('Op', ['topic', 'type', 'name', 'description', 'args', '_raw'])
+Op = namedtuple('Op', ['topic', 'type', 'name', 'description', 'args', 'raw'])
 
 
 class DeviceModel:
@@ -29,7 +30,7 @@ class DeviceModel:
         '''
         :specs: a list of operations spec
         '''
-        self._operations = []
+        self.operations = []
         for spec in self.get_specs():
             self.operations.append(self.parse_callable(spec))
 
@@ -40,36 +41,58 @@ class DeviceModel:
         '''
 
 
-class BaseClient:
+class BaseClient(object):
 
     def __init__(self, model, mqtt_client):
         self.model = model
         self.mqtt_client = mqtt_client
+
+    def validate_args(self, op, args):
+        '''
+        Right now the arguments can only be strings or integers
+        '''
+        # TODO: make this more extensible, with validators and stuff ???
+        for arg_template, arg in zip(op.args, args):
+            if arg_template.type == ArgType.STR:
+                raise_if(
+                    type(arg) not in [str, unicode],
+                    'Invalid parameter sent, should be str/unicode ({})'.format(
+                        arg_template.name),
+                    TypeError
+                )
+            elif arg_template.type == ArgType.INT:
+                raise_if(
+                    type(arg) not in [int, long],
+                    'Invalid parameter send, should be int/long'.format(
+                        arg_template.name),
+                    TypeError
+                )
 
     def _make_publish(self, op_name, payload, *args, **kwargs):
         '''
         checks in self model for op_name and issues appropriate publish
         '''
         op = self.get_op(op_name)
-
-        assert len(args) == len(op.args), (
+        raise_if(
+            len(args) != len(op.args),
             'Operation takes exactly {} arguments; {} given'.format(
-                len(args), len(op_args))
+                len(args), len(op.args)))
+        self.validate_args(op, args)
 
+        publish_topic = make_topic(op.topic, *args)
+        self.mqtt_client.publish(publish_topic, payload)
 
     def get_op(self, op_name):
-        ops = filter(lambda x: x.name == op_name, self.model)
+        ops = filter(lambda x: x.name == op_name, self.model.operations)
 
-        if not ops:
-            raise ValueError('No operation with name {}'.format(op_name))
-
-        if len(ops) > 1:
-            raise ValueError('Multiple operations for name {}'.format(op_name))
+        raise_if(len(ops) == 0, 'No operation with name {}'.format(op_name))
+        raise_if(len(ops) > 1, 'Multiple operations for name {}'.format(op_name))
 
         return ops[0]
 
 
 def _get_mqtt_publish(op_name):
+    # TODO: it's awkward to have the payload first; args should be first
     def publish(self, payload, *args):
         return self._make_publish(op_name, payload, *args)
 

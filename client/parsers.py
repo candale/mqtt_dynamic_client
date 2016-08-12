@@ -1,15 +1,17 @@
 from core import Op, OpArg, OpType
+from utils import raise_if
 from constants import OpType as ConstOpType
 
 
-def simple_validator(self, spec):
+# TODO: rename this to something standard (e.g. bar separated spec, idk)
+def simple_parser(self, spec):
     def get_or_raise_if_empty(obj, msg=None):
         if obj is None or obj == '':
             raise ValueError(msg or 'One of more spec details were empty')
         return obj
 
-    split_spec = self._spec.split('|')
-    assert len(split_spec) == 4, 'Missing fields from spec'
+    split_spec = spec.split('|')
+    raise_if(len(split_spec) != 5, 'Missing fields from spec')
 
     # Parse topic
     validated_data = {}
@@ -19,14 +21,16 @@ def simple_validator(self, spec):
     # Parse operation type
     op_type_str = get_or_raise_if_empty(
         split_spec[1], 'Operation type is mandatory')
-    assert ConstOpType.CALL in op_type_str or ConstOpType.RECV in op_type_str, (
-        'Operation type must be one of {} or {}'
-        .format(ConstOpType.CALL, ConstOpType.RECV))
+    raise_if(
+        not (ConstOpType.CALL in op_type_str or ConstOpType.RECV in op_type_str),
+        'Operation type must be one of {} or {}'.format(
+            ConstOpType.CALL, ConstOpType.RECV)
+    )
 
     if ConstOpType.RECV in op_type_str:
-        assert ',' in op_type_str, (
-            'For operation type {}, interval is mandatory'
-            .format(ConstOpType.RECV))
+        raise_if(
+            ',' not in op_type_str,
+            'For operation type {}, interval is mandatory'.format(ConstOpType.RECV))
         op_type, interval = op_type_str.split(',')
         interval = int(
             get_or_raise_if_empty(
@@ -51,15 +55,16 @@ def simple_validator(self, spec):
 
     # Parse arguments
     args_str = split_spec[4]
-    if not args_str:
-        args = None
-    else:
-        args = [
-            OpArg(
+    args = []
+    if args_str:
+        for arg_spec in args_str.split(','):
+            # TODO: improve exception messages
+            arg_type, arg_name = arg_spec.split(':')
+            args.append(OpArg(
                 type=get_or_raise_if_empty(arg_type, 'Invalid arg type'),
-                name=get_or_raise_if_empty(name, 'Invalid arg name'))
-            for arg_type, name in args_str.split(',')]
+                name=get_or_raise_if_empty(arg_name, 'Invalid arg name')))
 
     validated_data['args'] = args
+    validated_data['raw'] = spec
 
     return Op(**validated_data)

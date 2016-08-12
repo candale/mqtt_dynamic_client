@@ -1,17 +1,20 @@
 from core import DeviceModel
-from parsers import simple_validator
+from parsers import simple_parser
 
 
 class MockModel(DeviceModel):
+    '''
+    Testing, in development, model
+    '''
 
-    parse_callable = simple_validator
+    parse_callable = simple_parser
 
     def get_specs(self):
         return [
             'my/topic|call|no_argument_handler|test handler|',
-            'my/+/topic|call|one_argument_handler|test handler|string:topic_kind',
+            'my/+/topic|call|one_argument_handler|test handler|str:topic_kind',
             (
                 'my/+/+/topic|call|two_argument_handler|test handler|'
-                'string:topic_kind,string:topic_kind_level'
+                'str:topic_kind,str:topic_kind_level'
             ),
         ]

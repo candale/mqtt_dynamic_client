@@ -2,3 +2,8 @@
 class OpType:
     CALL = 'call'
     RECV = 'recv'
+
+
+class ArgType:
+    INT = 'int'
+    STR = 'str'
