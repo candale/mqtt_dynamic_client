@@ -16,7 +16,7 @@ class OneArgumentHandler(MessageHandlerBase):
         print(topic_kind, msg)
 
     def get_spec(self):
-        return 'call|one_argument_handler|test handler|string:topic_kind'
+        return 'call|one_argument_handler|test handler|str:topic_kind'
 
 
 class TwoArgumentHandler(MessageHandlerBase):
@@ -27,7 +27,7 @@ class TwoArgumentHandler(MessageHandlerBase):
     def get_spec(self):
         return (
             'call|two_argument_handler|test handler|'
-            'string:topic_kind,string:topic_kind_level')
+            'str:topic_kind,str:topic_kind_level')
 
 
 class MyMQTTRpc(MQTTRpc):
