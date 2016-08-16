@@ -13,6 +13,8 @@ class Device(models.Model):
         'Last time when the device was online', null=True, blank=True)
 
 
+# TODO: this should be refactored to hold all the attributes of the spec
+#       and have parsers that turn a spec into an object of this kind (Operation)
 class Operation(models.Model):
     spec = models.TextField('Operation specification')
     device = models.ForeignKey(
