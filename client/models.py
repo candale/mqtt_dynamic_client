@@ -11,10 +11,10 @@ class MockModel(DeviceModel):
 
     def get_specs(self):
         return [
-            'my/topic|call|no_argument_handler|test handler|',
-            'my/+/topic|call|one_argument_handler|test handler|str:topic_kind',
+            'call|no_argument_handler|test handler|',
+            'call|one_argument_handler|test handler|str:topic_kind',
             (
-                'my/+/+/topic|call|two_argument_handler|test handler|'
+                'call|two_argument_handler|test handler|'
                 'str:topic_kind,str:topic_kind_level'
             ),
         ]
