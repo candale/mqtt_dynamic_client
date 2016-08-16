@@ -1,0 +1,3 @@
+pudb==2016.2
+Pygments==2.1.3
+urwid==1.3.1
