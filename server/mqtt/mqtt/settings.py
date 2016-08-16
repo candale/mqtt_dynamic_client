@@ -15,7 +15,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 DJANGO_APPS = [
@@ -108,11 +107,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
+
+
+# MQTT Config
+
+MQTT_SERVER = '212.47.229.77'
+MQTT_PORT = 1883
+MQTT_MONITOR_ID = 'SERVER_MONITORING_APP'
+MQTT_KEEPALIVE = 60
+MQTT_DEVICE_SPEC_TOPIC = 'devices/+/spec'
