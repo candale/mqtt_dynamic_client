@@ -7,3 +7,4 @@ class OpType:
 class ArgType:
     INT = 'int'
     STR = 'str'
+    BOOL = 'bool'

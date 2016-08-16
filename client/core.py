@@ -21,7 +21,6 @@ class DeviceModel:
     :op_name: operation name
     :op_description: the description of the operations (docstring)
     :args: the arguments that the operation taskes as a list of type-name pairs
-
     '''
 
     parse_callable = None
@@ -63,7 +62,7 @@ class BaseClient(object):
             elif arg_template.type == ArgType.INT:
                 raise_if(
                     type(arg) not in [int, long],
-                    'Invalid parameter send, should be int/long'.format(
+                    'Invalid parameter send, should be int/long ({})'.format(
                         arg_template.name),
                     TypeError
                 )
