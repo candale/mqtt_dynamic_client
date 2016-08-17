@@ -1,4 +1,8 @@
 from collections import namedtuple
+import urlparse
+import requests
+import re
+from requests.exceptions import ConnectionError
 
 from utils import raise_if, make_topic
 from constants import ArgType
@@ -9,7 +13,7 @@ OpArg = namedtuple('OpArg', ['type', 'name'])
 Op = namedtuple('Op', ['topic', 'type', 'name', 'description', 'args', 'raw'])
 
 
-class DeviceModel:
+class DeviceModel(object):
     '''
     Parses a spec string of the form
         <op_topic>|<op_type[,<interval>]>|<op_name>|<op_description>|<arg_type:arg_name, ...>
@@ -98,14 +102,78 @@ def _get_mqtt_publish(op_name):
     return publish
 
 
-def make_client(model, cls_name, mqtt_client):
+def make_device_client(model, cls_name, mqtt_client):
     # TODO: maybe add inheritance support. not needed for now
     cls_props = {}
     for op in model.operations:
         method = _get_mqtt_publish(op.name)
-        method.__name__ = op.name
+        method.__name__ = (
+            str(op.name.decode('utf-8'))
+            if isinstance(op.name, unicode) else op.name)
         method.__doc__ = op.description
         cls_props[op.name] = method
 
     cls = type(cls_name, (BaseClient, ), cls_props)
     return cls(model, mqtt_client)
+
+
+class ServerClient(object):
+    # TODO: turn this into something smarter
+
+    device_list_url = '/device/'
+    device_detail = '/device/{}/'
+    device_operations = '/device/{}/operations/'
+
+    def __init__(self, domain, token=None):
+        # TODO: add token support
+        self.token = token
+        self.domain = domain
+
+    def _make_url(self, path):
+        return urlparse.urljoin(self.domain, path)
+
+    def get_devices(self, pattern=None):
+        '''
+        :pattern: a regex string onto which the id of the device is matched
+        '''
+        try:
+            response = requests.get(self._make_url(self.device_list_url))
+        except ConnectionError:
+            raise ValueError('Cannot connect to given server')
+
+        raise_if(
+            response.status_code != 200,
+            'Failed to get devices with code: {}'.format(response.status_code))
+
+        devices = response.json()
+
+        if pattern:
+            devices = filter(
+                lambda x: re.match(pattern, x['device_id']), devices)
+
+        return devices
+
+    def get_device(self, id):
+        devices = self.get_devices()
+        target_device = filter(lambda x: x['device_id'] == id, devices)
+
+        raise_if(len(target_device) == 0, 'No device with id'.format(id))
+        raise_if(len(target_device) > 1, 'Multiple devices with given id')
+
+        return target_device[0]
+
+    def get_device_operations(self, device_id):
+        device = self.get_device(device_id)
+        try:
+            response = requests.get(
+                self._make_url(self.device_operations.format(device['id'])))
+        except ConnectionError:
+            raise ValueError('Cannot connect to given server')
+
+        raise_if(
+            response.status_code != 200,
+            'Failed to get operations with code: {}'.format(
+                response.status_code)
+        )
+
+        return response.json()
