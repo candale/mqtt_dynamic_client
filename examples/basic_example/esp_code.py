@@ -36,7 +36,7 @@ class MyMQTTRpc(MQTTRpc):
         (b'my/topic', ConsoleHandler),
         (b'my/+/topic', OneArgumentHandler),
         (b'my/+/+/topic', TwoArgumentHandler))
-    name = 'Test'
+    name = 'test'
 
     def get_id(self):
         return self.name
