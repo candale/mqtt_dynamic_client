@@ -23,19 +23,10 @@ def on_message(client, userdata, msg):
 
     # TODO: this sucks. improve how spec is update so no operation is left
     #       hanging.
-    ops = device.operations.all()
-    operations = [op.spec for op in device.operations.all()]
-    collected_operations = {}
-    if msg.payload not in operations:
+    # TODO: change online state of device somehow
+    import pudb; pu.db
+    if device.operations.filter(spec=msg.payload).exists() is False:
         Operation.objects.create(spec=msg.payload, device=device)
-        collected_operations.add(msg.payload)
-    else:
-        collected_operations.add(msg.payload)
-
-    left_off = operations - collected_operations
-    for op in ops:
-        if op.spec in left_off:
-            op.delete()
 
 
 def on_connect(client, userdata, flags, rc):
