@@ -1,8 +1,7 @@
 import datetime
+import sys
 
-from functools import partial
-
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.conf import settings
 
 import paho.mqtt.client as mqtt
@@ -21,14 +20,21 @@ def on_message(client, userdata, msg):
         }
     )
 
+    if created:
+        sys.stdout.write('Added device with id: {}\n'.format(device_id))
+
     # TODO: this sucks. improve how spec is update so no operation is left
     #       hanging.
     # TODO: change online state of device somehow
     if device.operations.filter(spec=msg.payload).exists() is False:
         Operation.objects.create(spec=msg.payload, device=device)
+        sys.stdout.write(
+            'Create new operation with spec: {}\n'.format(msg.payload))
 
 
 def on_connect(client, userdata, flags, rc):
+    sys.stdout.write('Connected to broker\n')
+    sys.stdout.write('Waiting for incoming messages ...\n')
     client.subscribe(settings.MQTT_DEVICE_SPEC_TOPIC)
 
 
