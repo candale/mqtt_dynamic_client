@@ -36,7 +36,11 @@ class MyMQTTRpc(MQTTRpc):
         (b'my/topic', ConsoleHandler),
         (b'my/+/topic', OneArgumentHandler),
         (b'my/+/+/topic', TwoArgumentHandler))
+    name = 'Test'
+
+    def get_id(self):
+        return self.name
 
 
-rpc = MyMQTTRpc(b'lol', '212.47.229.77')
+rpc = MyMQTTRpc('212.47.229.77')
 rpc.start()
