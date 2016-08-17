@@ -1,18 +1,24 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import generics
+from rest_framework import generics, viewsets
 
-from device.serializers import OperationSerializer
+from device.serializers import OperationSerializer, DeviceSerializer
 from device.models import Operation, Device
 
 
-class DeviceOperations(generics.ListAPIView):
+class DeviceOperationsList(generics.ListAPIView):
 
     serializer_class = OperationSerializer
 
     def get_queryset(self):
-        get_object_or_404(Device, device_id=self.kwargs.get('device_id'))
+        get_object_or_404(Device, pk=self.kwargs.get('pk'))
         return Operation.objects.all()
 
     def filter_queryset(self, queryset):
-        return queryset.filter(device__device_id=self.kwargs.get('device_id'))
+        return queryset.filter(device__id=self.kwargs.get('pk'))
+
+
+class DeviceReadOnly(viewsets.ReadOnlyModelViewSet):
+
+    serializer_class = DeviceSerializer
+    queryset = Device.objects.all()

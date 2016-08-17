@@ -1,8 +1,15 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 
-from device.views import DeviceOperations
+from rest_framework.routers import DefaultRouter
 
+import device.views as views
+
+
+router = DefaultRouter()
+router.register(None, views.DeviceReadOnly)
 
 urlpatterns = [
-    url(r'(?P<device_id>.*)/operations/', DeviceOperations.as_view()),
+    url(r'^', include(router.urls)),
+    url(r'(?P<pk>\d+)/operations/',
+        views.DeviceOperationsList.as_view()),
 ]
