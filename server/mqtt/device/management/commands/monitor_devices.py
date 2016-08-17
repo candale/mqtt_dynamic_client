@@ -24,7 +24,6 @@ def on_message(client, userdata, msg):
     # TODO: this sucks. improve how spec is update so no operation is left
     #       hanging.
     # TODO: change online state of device somehow
-    import pudb; pu.db
     if device.operations.filter(spec=msg.payload).exists() is False:
         Operation.objects.create(spec=msg.payload, device=device)
 
