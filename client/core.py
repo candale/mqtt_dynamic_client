@@ -8,45 +8,20 @@ from utils import raise_if, make_topic
 from constants import ArgType
 
 
+# These classes define the contract for an operation
 OpType = namedtuple('OpType', ['type', 'interval'])
 OpArg = namedtuple('OpArg', ['type', 'name'])
-Op = namedtuple('Op', ['topic', 'type', 'name', 'description', 'args', 'raw'])
-
-
-class DeviceModel(object):
-    '''
-    Parses a spec string of the form
-        <op_topic>|<op_type[,<interval>]>|<op_name>|<op_description>|<arg_type:arg_name, ...>
-
-    :op_topic: the topic on which the operation can be called/data can be retrieved
-    :op_type: the nature of the operation (call/recv). for recv, the interval
-        is specified immediately after (separated by comma). the interval must
-        be specified in milliseconds
-    :op_name: operation name
-    :op_description: the description of the operations (docstring)
-    :args: the arguments that the operation taskes as a list of type-name pairs
-    '''
-
-    parse_callable = None
-
-    def __init__(self):
-        '''
-        :specs: a list of operations spec
-        '''
-        self.operations = []
-        for spec in self.get_specs():
-            self.operations.append(self.parse_callable(spec))
-
-    def get_specs(self):
-        '''
-        Returns an iterable that contains (as strings) the specs.
-        This method is to be overridden to get specs from whatever sources.
-        '''
+Op = namedtuple('Op', ['topic', 'type', 'name', 'description', 'args'])
 
 
 class BaseClient(object):
 
     def __init__(self, model, mqtt_client):
+        '''
+        :model: an object that has an iterable `operations` with objects of
+                type Op
+        '''
+        # TODO: think again about this model thingy; maybe simply a dict?
         self.model = model
         self.mqtt_client = mqtt_client
 

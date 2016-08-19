@@ -1,6 +1,6 @@
 from paho.mqtt.client import Client as MQTTClient
 
-from client.models import MockModel, ServerAPIModel
+from client.models import ServerAPIModel
 from client.core import make_device_client
 
 

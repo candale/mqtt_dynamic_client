@@ -1,36 +1,24 @@
-from core import DeviceModel, ServerClient
+from core import ServerClient, OpType, OpArg, Op
 from parsers import simple_parser
 
 
-class MockModel(DeviceModel):
-    '''
-    Testing, in development, model
-    '''
-
-    parse_callable = simple_parser
-
-    def get_specs(self):
-        return [
-            'call|no_argument_handler|test handler|',
-            'call|one_argument_handler|test handler|str:topic_kind',
-            (
-                'call|two_argument_handler|test handler|'
-                'str:topic_kind,str:topic_kind_level'
-            ),
-        ]
-
-
-class ServerAPIModel(DeviceModel):
+class ServerAPIModel(object):
 
     parse_callable = simple_parser
 
     def __init__(self, domain, device_id):
         self.device_id = device_id
         self._server_client = ServerClient(domain)
-        super(ServerAPIModel, self).__init__()
+        self.operations = self.get_specs()
 
     def get_specs(self):
-        return [
-            op['spec']
-            for op in self._server_client.get_device_operations(self.device_id)
-        ]
+        ops = []
+        for op in self._server_client.get_device_operations(self.device_id):
+            args = [OpArg(**arg) for arg in op.pop('args')]
+            op_type = OpType(type=op.pop('type'), interval=op.pop('interval'))
+            op['type'] = op_type
+            op['args'] = args
+            op_obj = Op(**op)
+            ops.append(op_obj)
+
+        return ops
