@@ -1,12 +1,14 @@
 import datetime
+import importlib
 import sys
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 import paho.mqtt.client as mqtt
 
-from device.models import Device, Operation
+from device.models import Device, Operation, Arg
 from device.utils import get_id_from_spec_topic
 
 
@@ -26,10 +28,15 @@ def on_message(client, userdata, msg):
     # TODO: this sucks. improve how spec is update so no operation is left
     #       hanging.
     # TODO: change online state of device somehow
-    if device.operations.filter(spec=msg.payload).exists() is False:
-        Operation.objects.create(spec=msg.payload, device=device)
-        sys.stdout.write(
-            'Create new operation with spec: {}\n'.format(msg.payload))
+    parser = import_string(settings.SPEC_PARSER)
+    validated_data = parser(msg.payload)
+    validated_data['device_id'] = device.id
+    args = validated_data.pop('args')
+
+    operation = Operation.objects.create(**validated_data)
+    for arg in args:
+        arg['operation'] = operation
+        Arg.objects.create(**arg)
 
 
 def on_connect(client, userdata, flags, rc):

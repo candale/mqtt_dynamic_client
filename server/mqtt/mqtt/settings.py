@@ -1,5 +1,16 @@
 import os
 
+print (
+    "\n\nTODO: turn this into an app that basically exposes a management "
+    "some basic serializers and a way to configure the spec (in settings) "
+    "i.e. what serializer should it use and stuff. \n"
+    "Things to configure: \n"
+    "   1. the spec format (some serializers, in settings)\n"
+    "   2. the mqtt broker \n"
+    "... this must be it\n\n"
+)
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -29,7 +40,8 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_auth'
+    'rest_auth',
+    'django_extensions'
 ]
 
 MY_APPS = [
@@ -123,3 +135,8 @@ MQTT_PORT = 1883
 MQTT_MONITOR_ID = 'SERVER_MONITORING_APP'
 MQTT_KEEPALIVE = 60
 MQTT_DEVICE_SPEC_TOPIC = 'devices/+/spec'
+
+
+# Specification config
+
+SPEC_PARSER = 'device.spec_parsers.simple_parser'
