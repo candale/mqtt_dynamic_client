@@ -11,15 +11,15 @@ class Device(models.Model):
         max_length=256, db_index=True, unique=True)
     online = models.BooleanField(
         'The online/offline state of the device', default=False)
-    last_online = models.DateTimeField(
-        'Last time when the device was online', null=True, blank=True)
+    last_offline = models.DateTimeField(
+        'Last time the device went offline', null=True, blank=True)
 
 
-# TODO: this should be refactored to hold all the attributes of the spec
-#       and have parsers that turn a spec into an object of this kind (Operation)
 class Operation(models.Model):
+
     name = models.CharField(
-        'Valid (language specific) operation name', max_length=256)
+        'Valid (language specific) operation name',
+        max_length=256, db_index=True)
     type = models.CharField(
         'Operation data direction', max_length=32, choices=OpType.CHOICES)
     interval = models.IntegerField(
@@ -29,6 +29,11 @@ class Operation(models.Model):
     topic = models.CharField(max_length=1024)
     device = models.ForeignKey(
         Device, on_delete=models.CASCADE, related_name='operations')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (('name', 'device'))
 
     def __str__(self):
         return self.name

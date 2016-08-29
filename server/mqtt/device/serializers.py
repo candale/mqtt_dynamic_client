@@ -23,4 +23,4 @@ class DeviceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Device
-        fields = ('id', 'device_id', 'online', 'last_online')
+        fields = ('id', 'device_id', 'online', 'last_offline')

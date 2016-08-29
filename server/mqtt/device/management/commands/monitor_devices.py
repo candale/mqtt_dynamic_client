@@ -14,19 +14,16 @@ from device.utils import get_id_from_spec_topic
 
 def on_message(client, userdata, msg):
     device_id = get_id_from_spec_topic(msg.topic)
-    device, created = Device.objects.get_or_create(
-        device_id=device_id,
-        defaults={
-            'last_online': datetime.datetime.now(),
-            'online': True
-        }
+    device, created = Device.objects.create_or_update(
+        device_id=device_id, defaults={'online': True}
     )
 
     if created:
         sys.stdout.write('Added device with id: {}\n'.format(device_id))
+    else:
+        device.operations.filter(
+            created_at__lt=device.last_offline).delete()
 
-    # TODO: this sucks. improve how spec is update so no operation is left
-    #       hanging.
     # TODO: change online state of device somehow
     parser = import_string(settings.SPEC_PARSER)
     validated_data = parser(msg.payload)
@@ -34,6 +31,9 @@ def on_message(client, userdata, msg):
     args = validated_data.pop('args')
 
     operation = Operation.objects.create(**validated_data)
+    sys.stdout.write(
+        'Create operation {} for device {}\n'.format(
+            operation.name, device.device_id))
     for arg in args:
         arg['operation'] = operation
         Arg.objects.create(**arg)
