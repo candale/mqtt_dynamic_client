@@ -12,6 +12,7 @@ from device.models import Device, Operation, Arg
 from device.utils import get_id_from_spec_topic
 
 
+# TODO: change so that last will message will be parsed
 def on_message(client, userdata, msg):
     device_id = get_id_from_spec_topic(msg.topic)
     device, created = Device.objects.create_or_update(

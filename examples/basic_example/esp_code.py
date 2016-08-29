@@ -32,15 +32,16 @@ class TwoArgumentHandler(MessageHandlerBase):
 
 class MyMQTTRpc(MQTTRpc):
 
+    name = 'test'
+    server = '212.47.229.77'
     handler_classes = (
         (b'my/topic', ConsoleHandler),
         (b'my/+/topic', OneArgumentHandler),
         (b'my/+/+/topic', TwoArgumentHandler))
-    name = 'test'
 
     def get_id(self):
         return self.name
 
 
-rpc = MyMQTTRpc('212.47.229.77')
+rpc = MyMQTTRpc()
 rpc.start()
