@@ -134,7 +134,12 @@ MQTT_SERVER = '212.47.229.77'
 MQTT_PORT = 1883
 MQTT_MONITOR_ID = 'SERVER_MONITORING_APP'
 MQTT_KEEPALIVE = 60
+# TODO: add this to some doc
+# Should be a topic that has a single parameter (+)
 MQTT_DEVICE_SPEC_TOPIC = 'devices/+/spec'
+# TODO: add this to some doc
+# Should be a topic that has a single parameter
+MQTT_DEVICE_OFFLINE = 'devices/+/offline'
 
 
 # Specification config
