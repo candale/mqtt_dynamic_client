@@ -41,6 +41,7 @@ class Operation(models.Model):
 
 # TODO: consider having the arguments as a list or something like that on the
 #       operation so you don't hit the database so many times
+# TODO: enforce arg order because in topic they must be in a specific order
 class Arg(models.Model):
     type = models.CharField(
         'Type of argument', max_length=32, choices=ArgType.CHOICES)

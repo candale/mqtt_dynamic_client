@@ -39,3 +39,14 @@ def match_topic(raw_topic, to_match):
             return False, []
 
     return True, args
+
+
+def build_topic(raw_topic, args):
+    raise_if(
+        raw_topic.count('+') != len(args),
+        'Different number of args than topic has')
+
+    if '+' not in raw_topic:
+        return raw_topic
+
+    return raw_topic.replace('+', '{}').format(*args)

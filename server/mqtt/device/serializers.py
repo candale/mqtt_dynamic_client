@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from device.models import Operation, Device, Arg
+from device.constants import ArgType
 
 
 class ArgSerializer(serializers.ModelSerializer):
@@ -24,3 +25,9 @@ class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
         fields = ('id', 'device_id', 'online', 'last_offline')
+
+
+class DeviceDoSerialier(serializers.BaseSerializer):
+
+    payload = serializers.CharField()
+    args = serializers.ListField()

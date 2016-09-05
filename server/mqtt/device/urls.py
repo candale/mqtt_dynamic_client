@@ -10,6 +10,8 @@ router.register(None, views.DeviceReadOnly)
 
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'(?P<pk>\d+)/operations/',
+    url(r'(?P<device_id>[\w\d_-]+)/operations/$',
         views.DeviceOperationsList.as_view()),
+    url(r'(?P<device_id>[\w\d_-]+)/operations/(?P<operation>[\w\d_]+)/$',
+        views.DeviceDo.as_view())
 ]
