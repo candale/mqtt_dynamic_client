@@ -34,6 +34,7 @@ class MyMQTTRpc(MQTTRpc):
 
     name = 'test'
     server = '212.47.229.77'
+    self_keepalive = True
     handler_classes = (
         (b'my/topic', ConsoleHandler),
         (b'my/+/topic', OneArgumentHandler),
