@@ -1,13 +1,14 @@
 import uuid
+import json
 
 from django.shortcuts import get_object_or_404
-from django.http import Http404, HttpResponseBadRequest
+from django.http import Http404, JsonResponse
 from django.conf import settings
 
-from rest_framework import generics, viewsets, mixins
+from rest_framework import generics, viewsets, status
 
 from device.serializers import (
-    OperationSerializer, DeviceSerializer, DeviceDoSerialier)
+    OperationSerializer, DeviceSerializer, DeviceDoSerializer)
 from device.models import Operation, Device
 from device.utils import build_topic
 
@@ -34,10 +35,10 @@ class DeviceReadOnly(viewsets.ReadOnlyModelViewSet):
     lookup_url_kwarg = 'device_id'
 
 
-class DeviceDo(mixins.CreateModelMixin, generics.GenericAPIView):
+class DeviceDo(generics.CreateAPIView):
 
     queryset = Operation.objects.all()
-    serializer_class = DeviceDoSerialier
+    serializer_class = DeviceDoSerializer
 
     def get_object(self):
         qs = self.filter_queryset(self.get_queryset())
@@ -57,7 +58,11 @@ class DeviceDo(mixins.CreateModelMixin, generics.GenericAPIView):
         try:
             super(DeviceDo, self).create(request, *args, **kwargs)
         except ValueError, e:
-            return HttpResponseBadRequest(e)
+            return JsonResponse(
+                {"status": "error", "error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST)
+
+        return JsonResponse({"status": "ok"})
 
     def perform_create(self, serializer):
         obj = self.get_object()
@@ -70,5 +75,6 @@ class DeviceDo(mixins.CreateModelMixin, generics.GenericAPIView):
             settings.MQTT_SERVER, settings.MQTT_PORT, settings.MQTT_KEEPALIVE)
 
         mqtt_client.publish(
-            build_topic(obj.topic, serializer.args), serializer.payload)
+            build_topic(obj.topic, serializer.validated_data['args']),
+            serializer.validated_data['payload'])
         mqtt_client.disconnect()

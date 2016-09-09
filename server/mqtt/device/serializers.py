@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import serializers
 
 from device.models import Operation, Device, Arg
@@ -27,7 +29,15 @@ class DeviceSerializer(serializers.ModelSerializer):
         fields = ('id', 'device_id', 'online', 'last_offline')
 
 
-class DeviceDoSerialier(serializers.BaseSerializer):
+class DeviceDoSerializer(serializers.BaseSerializer):
 
     payload = serializers.CharField()
+    # TODO: maybe change this so you get a topic prefiled with the parameters
+    #       ... maybe
     args = serializers.ListField()
+
+    def to_internal_value(self, data):
+        return data
+
+    def to_representation(self, obj):
+        return json.dumps({'status': 'ok'})
