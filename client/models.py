@@ -1,19 +1,23 @@
-from core import ServerClient, OpType, OpArg, Op
-from parsers import simple_parser
+import requests
+
+from core import OpType, OpArg, Op
+from parsers import bar_separated_spec
 
 
 class ServerAPIModel(object):
 
-    parse_callable = simple_parser
+    parse_callable = bar_separated_spec
 
     def __init__(self, domain, device_id):
         self.device_id = device_id
-        self._server_client = ServerClient(domain)
+        self.domain = domain
         self.operations = self.get_specs()
 
     def get_specs(self):
         ops = []
-        for op in self._server_client.get_device_operations(self.device_id):
+        json_operations = requests.get(
+            self.domain + '/device/{}/operations'.format(self.device_id)).json()
+        for op in json_operations:
             args = [OpArg(**arg) for arg in op.pop('args')]
             op_type = OpType(type=op.pop('type'), interval=op.pop('interval'))
             op['type'] = op_type

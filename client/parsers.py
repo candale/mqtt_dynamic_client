@@ -1,10 +1,13 @@
-from core import Op, OpArg, OpType
+from core import Op, OpArg
 from utils import raise_if
-from constants import OpType as ConstOpType
+from constants import OpType
 
 
-# TODO: rename this to something standard (e.g. bar separated spec, idk)
-def simple_parser(self, spec):
+def bar_separated_spec(self, spec):
+    '''
+    Parses a string of the format
+        <topic>|<op_type(recv|call)>|<function_name>|<description>|<arg_type:arg_name>,...
+    '''
     def get_or_raise_if_empty(obj, msg=None):
         if obj is None or obj == '':
             raise ValueError(msg or 'One of more spec details were empty')
@@ -19,32 +22,15 @@ def simple_parser(self, spec):
         split_spec[0], 'Operation topic is mandatory')
 
     # Parse operation type
-    op_type_str = get_or_raise_if_empty(
+    op_type = get_or_raise_if_empty(
         split_spec[1], 'Operation type is mandatory')
     raise_if(
-        not (ConstOpType.CALL in op_type_str or ConstOpType.RECV in op_type_str),
+        op_type not in [OpType.CALL, OpType.RECV],
         'Operation type must be one of {} or {}'.format(
-            ConstOpType.CALL, ConstOpType.RECV)
+            OpType.CALL, OpType.RECV)
     )
 
-    if ConstOpType.RECV in op_type_str:
-        raise_if(
-            ',' not in op_type_str,
-            'For operation type {}, interval is mandatory'.format(ConstOpType.RECV))
-        op_type, interval = op_type_str.split(',')
-        interval = int(
-            get_or_raise_if_empty(
-                interval,
-                'Interval is mandatory for operations of type {}'.format(
-                    ConstOpType.RECV)
-            )
-        )
-
-        validated_data['type'] = OpType(
-            type=op_type, interval=interval)
-    else:
-        validated_data['type'] = OpType(
-            type=op_type_str, interval=None)
+    validated_data['type'] = op_type
 
     # Parse operation name
     validated_data['name'] = get_or_raise_if_empty(
