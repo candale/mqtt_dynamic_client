@@ -1,8 +1,4 @@
 from collections import namedtuple
-import urlparse
-import requests
-import re
-from requests.exceptions import ConnectionError
 
 from utils import raise_if, make_topic
 from constants import ArgType
