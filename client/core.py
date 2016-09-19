@@ -5,7 +5,6 @@ from constants import ArgType
 
 
 # These classes define the contract for an operation
-OpType = namedtuple('OpType', ['type', 'interval'])
 OpArg = namedtuple('OpArg', ['type', 'name'])
 Op = namedtuple('Op', ['topic', 'type', 'name', 'description', 'args'])
 

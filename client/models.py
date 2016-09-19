@@ -1,6 +1,6 @@
 import requests
 
-from core import OpType, OpArg, Op
+from core import OpArg, Op
 from parsers import bar_separated_spec
 
 
@@ -19,8 +19,7 @@ class ServerAPIModel(object):
             self.domain + '/device/{}/operations'.format(self.device_id)).json()
         for op in json_operations:
             args = [OpArg(**arg) for arg in op.pop('args')]
-            op_type = OpType(type=op.pop('type'), interval=op.pop('interval'))
-            op['type'] = op_type
+            op['type'] = op.pop('type')
             op['args'] = args
             op_obj = Op(**op)
             ops.append(op_obj)

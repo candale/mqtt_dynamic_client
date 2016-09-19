@@ -14,30 +14,14 @@ def simple_parser(spec):
 
     # Parse operation type
     raise_if(split_spec[1] in [None, ''], 'Operation type is mandatory')
-    op_type_str = split_spec[1]
+    op_type = split_spec[1]
     raise_if(
-        not (OpType.CALL in op_type_str or OpType.RECV in op_type_str),
+        not (OpType.CALL in op_type or OpType.RECV in op_type),
         'Operation type must be one of {} or {}'.format(
             OpType.CALL, OpType.RECV)
     )
 
-    if OpType.RECV in op_type_str:
-        raise_if(
-            ',' not in op_type_str,
-            'For operation type {}, interval is mandatory'.format(OpType.RECV))
-        op_type, interval = op_type_str.split(',')
-        interval = int(
-            raise_if(
-                interval in [None, ''],
-                'Interval is mandatory for operations of type {}'.format(
-                    OpType.RECV)
-            )
-        )
-
-        validated_data['type'] = op_type
-        validated_data['interval'] = interval
-    else:
-        validated_data['type'] = op_type_str
+    validated_data['type'] = op_type
 
     # Parse operation name
     raise_if(split_spec[2] in [None, ''], 'Operation name is mandatory')
