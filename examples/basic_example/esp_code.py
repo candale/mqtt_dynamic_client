@@ -40,9 +40,6 @@ class MyMQTTRpc(MQTTRpc):
         (b'my/+/topic', OneArgumentHandler),
         (b'my/+/+/topic', TwoArgumentHandler))
 
-    def get_id(self):
-        return self.name
-
 
 rpc = MyMQTTRpc()
 rpc.start()
