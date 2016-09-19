@@ -3,7 +3,6 @@ import json
 from rest_framework import serializers
 
 from device.models import Operation, Device, Arg
-from device.constants import ArgType
 
 
 class ArgSerializer(serializers.ModelSerializer):
@@ -19,7 +18,7 @@ class OperationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Operation
-        fields = ('name', 'type', 'interval', 'description', 'args', 'topic')
+        fields = ('name', 'type', 'description', 'args', 'topic')
 
 
 class DeviceSerializer(serializers.ModelSerializer):

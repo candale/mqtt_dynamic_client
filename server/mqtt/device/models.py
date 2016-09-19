@@ -22,9 +22,6 @@ class Operation(models.Model):
         max_length=256, db_index=True)
     type = models.CharField(
         'Operation data direction', max_length=32, choices=OpType.CHOICES)
-    interval = models.IntegerField(
-        'Interval (in ms) at which data is published by this operation',
-        null=True, blank=True)
     description = models.TextField('Description of operation', blank=True)
     topic = models.CharField(max_length=1024)
     device = models.ForeignKey(
