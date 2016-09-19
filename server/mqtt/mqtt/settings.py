@@ -136,10 +136,12 @@ MQTT_MONITOR_ID = 'SERVER_MONITORING_APP'
 MQTT_KEEPALIVE = 60
 # TODO: add this to some doc
 # Should be a topic that has a single parameter (+)
-MQTT_DEVICE_SPEC_TOPIC = 'devices/+/spec'
+MQTT_DEVICE_SPEC_TOPIC = 'device/+/spec'
 # TODO: add this to some doc
 # Should be a topic that has a single parameter
-MQTT_DEVICE_OFFLINE = 'devices/+/offline'
+MQTT_DEVICE_STATUS_TOPIC = 'device/+/status'
+MQTT_DEVICE_STATUS_ONLINE_MSG = '+'
+MQTT_DEVICE_STATUS_OFFLINE_MSG = '-'
 
 
 # Specification config

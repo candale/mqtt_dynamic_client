@@ -4,6 +4,7 @@ import sys
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.utils.module_loading import import_string
+from django.db.utils import IntegrityError
 
 import paho.mqtt.client as mqtt
 
@@ -11,7 +12,7 @@ from device.models import Device, Operation, Arg
 from device.utils import match_topic, raise_if
 
 
-def online(msg, device_id):
+def spec(msg, device_id):
     # TODO: change so that if a device is already seen as online,
     #       we should somehow treat that
     #       this may happen when the keepalive time of a device is long enough
@@ -33,7 +34,13 @@ def online(msg, device_id):
     validated_data['device_id'] = device.id
     args = validated_data.pop('args')
 
-    operation = Operation.objects.create(**validated_data)
+    try:
+        operation = Operation.objects.create(**validated_data)
+    except IntegrityError:
+        Operation.objects.filter(
+            device_id=device.id, name=validated_data['name']).first().delete()
+        operation = Operation.objects.create(**validated_data)
+
     sys.stdout.write(
         'Create operation {} for device {}\n'.format(
             operation.name, device.device_id))
@@ -42,29 +49,33 @@ def online(msg, device_id):
         Arg.objects.create(**arg)
 
 
-def offline(msg, device_id):
+def status(msg, device_id):
     try:
         device = Device.objects.get(device_id=device_id)
     except Device.DoesNotExist:
         pass
 
-    device.online = False
-    device.last_offline = datetime.datetime.now()
+    device.online = (
+        msg.payload == settings.MQTT_DEVICE_STATUS_ONLINE_MSG or
+        msg.payload == settings.MQTT_DEVICE_STATUS_OFFLINE_MSG)
+    if device.online is False:
+        device.last_offline = datetime.datetime.now()
     device.save()
 
-    sys.stdout.write('Device {} is offline\n'.format('device_id'))
+    sys.stdout.write('Device {} is {}\n'.format(
+        device_id, ['offline', 'online'][device.online]))
 
 
 def on_message(client, userdata, msg):
-    is_connect, connect_args = match_topic(
+    is_spec, connect_args = match_topic(
         settings.MQTT_DEVICE_SPEC_TOPIC, msg.topic)
-    is_disconnect, disconnect_args = match_topic(
-        settings.MQTT_DEVICE_OFFLINE, msg.topic)
+    is_status, disconnect_args = match_topic(
+        settings.MQTT_DEVICE_STATUS_TOPIC, msg.topic)
 
-    if is_connect:
-        online(msg, connect_args[0])
-    elif is_disconnect:
-        offline(msg, disconnect_args[0])
+    if is_spec:
+        spec(msg, connect_args[0])
+    elif is_status:
+        status(msg, disconnect_args[0])
 
 
 def on_connect(client, userdata, flags, rc):
@@ -75,11 +86,11 @@ def on_connect(client, userdata, flags, rc):
         settings.MQTT_DEVICE_SPEC_TOPIC.count('+') != 1,
         'Spec topic should have a single parameter, device id (one +)')
     raise_if(
-        settings.MQTT_DEVICE_OFFLINE.count('+') != 1,
-        'Offline topic should have a single parameter, device id (one +)')
+        settings.MQTT_DEVICE_STATUS_TOPIC.count('+') != 1,
+        'Status topic should have a single parameter, device id (one +)')
 
     client.subscribe(settings.MQTT_DEVICE_SPEC_TOPIC)
-    client.subscribe(settings.MQTT_DEVICE_OFFLINE)
+    client.subscribe(settings.MQTT_DEVICE_STATUS_TOPIC)
 
 
 class Command(BaseCommand):
