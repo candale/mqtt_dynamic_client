@@ -12,11 +12,11 @@ The project consists of three parts:
 
 On the device there are user-defined operations that are specified like this:
 ```
-<mqtt_topic>|<op_type (call|recv)|<op_name>|<op_description>|<arg_type:arg_name>, ...
+<mqtt_topic>|<op_type (call|recv)>|<op_name>|<op_description>|<arg_type:arg_name>, ...
 ```
 or without arguments:
 ```
-<mqtt_topic>|<op_type (call|recv)|<op_name>|<op_description>|
+<mqtt_topic>|<op_type (call|recv)>|<op_name>|<op_description>|
 ```
 
 One is free to use whatever format one desires by implementing a parser that turns the specification into a standard representation (on the web app part).
