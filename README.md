@@ -1,4 +1,4 @@
-### MQTT RPC
+# MQTT RPC
 
 This project aims to facilitate the communication between a user and a 
 wireless enabled device.
@@ -28,4 +28,4 @@ When the device boots up, the specifications of all operations are published on 
 The web application listens to the specification topic and stores in the database the devices with the published operations and exposes an API through which one can call the operations on any given device.
 
 
-# TODO: this is just a badly written draft; improve
+### TODO: this is just a badly written draft; improve
