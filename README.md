@@ -5,10 +5,10 @@ wireless enabled device.
 
 ## Description
 
-The project consists of three parts
-    * device application
-    * MQTT broker
-    * web application
+The project consists of three parts:
++ device application
++ MQTT broker
++ web application
 
 On the device there are user-defined operations that are specified like this:
 ```
