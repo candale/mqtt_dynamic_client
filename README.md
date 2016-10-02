@@ -26,3 +26,6 @@ The device application is responsible for intercepting and routing MQTT messages
 When the device boots up, the specifications of all operations are published on a MQTT topic (`device/<device_id>/spec`).
 
 The web application listens to the specification topic and stores in the database the devices with the published operations and exposes an API through which one can call the operations on any given device.
+
+
+# TODO: this is just a badly written draft; improve
