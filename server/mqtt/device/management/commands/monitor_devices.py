@@ -13,11 +13,6 @@ from device.utils import match_topic, raise_if
 
 
 def spec(msg, device_id):
-    # TODO: change so that if a device is already seen as online,
-    #       we should somehow treat that
-    #       this may happen when the keepalive time of a device is long enough
-    #       such that it is unresponsive but the broker has not yet figured
-    #       that out because the keepalive has not expired yet
     device, created = Device.objects.update_or_create(
         device_id=device_id, defaults={'online': True}
     )
@@ -53,11 +48,17 @@ def status(msg, device_id):
     try:
         device = Device.objects.get(device_id=device_id)
     except Device.DoesNotExist:
-        pass
+        device = Device.objects.create(device_id=device_id, online=False)
 
-    device.online = (
-        msg.payload == settings.MQTT_DEVICE_STATUS_ONLINE_MSG or
-        msg.payload == settings.MQTT_DEVICE_STATUS_OFFLINE_MSG)
+    accepted = [
+        settings.MQTT_DEVICE_STATUS_ONLINE_MSG,
+        settings.MQTT_DEVICE_STATUS_OFFLINE_MSG]
+    if msg.payload not in accepted:
+        raise ValueError(
+            "Improperly configured: status payload should be "
+            "'{}'/'{}'".format(*accepted))
+
+    device.online = msg.payload == settings.MQTT_DEVICE_STATUS_ONLINE_MSG
     if device.online is False:
         device.last_offline = datetime.datetime.now()
     device.save()
