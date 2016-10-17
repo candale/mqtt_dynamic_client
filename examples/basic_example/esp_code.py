@@ -33,7 +33,7 @@ class TwoArgumentHandler(MessageHandlerBase):
 class MyMQTTRpc(MQTTRpc):
 
     name = 'test'
-    server = '212.47.229.77'
+    server = 'mqtt.acandale.com'
     self_keepalive = True
     handler_classes = (
         (b'my/topic', ConsoleHandler),

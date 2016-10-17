@@ -6,10 +6,10 @@ from client.core import make_device_client
 
 # Init mqtt client
 mqtt_client = MQTTClient('paho_lol')
-mqtt_client.connect('212.47.229.77', 1883, 6000)
+mqtt_client.connect('mqtt.acandale.com', 1883, 6000)
 
 # Create the model
-model = ServerAPIModel('http://localhost:8000', '6666')
+model = ServerAPIModel('http://localhost:8000', 'test')
 
 # Create the client
 cl = make_device_client(model, 'my_client', mqtt_client)
