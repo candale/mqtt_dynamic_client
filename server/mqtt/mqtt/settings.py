@@ -143,6 +143,9 @@ MQTT_DEVICE_STATUS_TOPIC = 'device/+/status'
 MQTT_DEVICE_STATUS_ONLINE_MSG = '+'
 MQTT_DEVICE_STATUS_OFFLINE_MSG = '-'
 
+# RabbitMq connection details for Kombu
+MQTT_ACK_AMQP_CONNECTION_URL = 'amqp://gues@172.17.0.2'
+
 
 # Specification config
 

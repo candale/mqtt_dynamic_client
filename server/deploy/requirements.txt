@@ -3,3 +3,4 @@ djangorestframework==3.4.4
 django-allauth==0.26.1
 django-rest-auth==0.8.1
 paho-mqtt==1.2
+kombu==3.0.37

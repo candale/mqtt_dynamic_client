@@ -1,6 +1,3 @@
-import uuid
-import json
-
 from django.shortcuts import get_object_or_404
 from django.http import Http404, JsonResponse
 from django.conf import settings
@@ -10,9 +7,7 @@ from rest_framework import generics, viewsets, status
 from device.serializers import (
     OperationSerializer, DeviceSerializer, DeviceDoSerializer)
 from device.models import Operation, Device
-from device.utils import build_topic
-
-import paho.mqtt.client as mqtt
+from device.utils import build_topic, send_message_from_api
 
 
 class DeviceOperationsList(generics.ListAPIView):
@@ -70,11 +65,6 @@ class DeviceDo(generics.CreateAPIView):
         if obj.device.online is False:
             return ValueError('Device offline')
 
-        mqtt_client = mqtt.Client(str(uuid.uuid4())[:8])
-        mqtt_client.connect(
-            settings.MQTT_SERVER, settings.MQTT_PORT, settings.MQTT_KEEPALIVE)
-
-        mqtt_client.publish(
-            build_topic(obj.topic, serializer.validated_data['args']),
+        published = send_message_from_api(
+            obj.topic, serializer.validated_data['args'],
             serializer.validated_data['payload'])
-        mqtt_client.disconnect()
