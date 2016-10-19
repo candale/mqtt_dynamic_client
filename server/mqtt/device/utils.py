@@ -1,9 +1,9 @@
 import uuid
+import time
 
 from django.conf import settings
 
 import paho.mqtt.client as mqtt
-from kombu import Connection
 
 from device import ampq
 
@@ -63,24 +63,52 @@ def get_ack_token(client_id, mid):
     return '{}-{}'.format(client_id, mid)
 
 
-def send_message_from_api(topic, args, payload,
-                          wait_for_published=True, wait_for_received=False):
+def send_message_from_api(topic, args, payload, timeout=0.7,
+                          wait_for_received=True):
+    '''
+    Not the best implementation of this buut...it will do for now, I guess
+    '''
+    was_published = []
+    was_recv = []
+
     def on_publish(client, userdata, mid):
-        ampq.published(
-            client._client_id, get_ack_token(client._client_id, mid))
+        print 'published'
+        was_published.append(True)
+
+    def on_msg(client, userdata, msg):
+        print 'received'
+        if msg.payload == '+':
+            was_recv.append(True)
+
+    def ack_done():
+        return (
+            was_published and
+            was_recv or not wait_for_received
+        )
 
     mqtt_client = mqtt.Client(str(uuid.uuid4())[:16])
+    mqtt_client.on_publish = on_publish
+    mqtt_client.on_message = on_msg
     mqtt_client.connect(
         settings.MQTT_SERVER, settings.MQTT_PORT, settings.MQTT_KEEPALIVE)
+    mqtt_client.subscribe(settings.MQTT_DEVICE_ACK_TOPIC)
 
     result, mid = mqtt_client.publish(build_topic(topic, args), payload)
 
-    if not result:
+    if result:
+        print 'failed'
         return False
 
-    result = ampq.wait_for_published(
-        mqtt_client._client_id, get_ack_token(mqtt_client._client_id, mid))
+    counter = 0
+    while not ack_done() and counter < timeout:
+        mqtt_client.loop(timeout=0.07)
+        counter += 0.07
+
+    print 'loop done'
+    print 'counter', counter
 
     mqtt_client.disconnect()
 
-    return result
+    return (
+        (was_published and was_published[0]) and
+        (was_recv or not wait_for_received))

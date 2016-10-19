@@ -140,11 +140,10 @@ MQTT_DEVICE_SPEC_TOPIC = 'device/+/spec'
 # TODO: add this to some doc
 # Should be a topic that has a single parameter
 MQTT_DEVICE_STATUS_TOPIC = 'device/+/status'
+MQTT_DEVICE_ACK_TOPIC = 'device/+/ack'
 MQTT_DEVICE_STATUS_ONLINE_MSG = '+'
 MQTT_DEVICE_STATUS_OFFLINE_MSG = '-'
 
-# RabbitMq connection details for Kombu
-MQTT_ACK_AMQP_CONNECTION_URL = 'amqp://gues@172.17.0.2'
 
 
 # Specification config

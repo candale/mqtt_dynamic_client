@@ -10,6 +10,14 @@ from device.models import Operation, Device
 from device.utils import build_topic, send_message_from_api
 
 
+class NotSentException(Exception):
+    pass
+
+
+class DeviceOfflineException(Exception):
+    pass
+
+
 class DeviceOperationsList(generics.ListAPIView):
 
     serializer_class = OperationSerializer
@@ -52,7 +60,7 @@ class DeviceDo(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         try:
             super(DeviceDo, self).create(request, *args, **kwargs)
-        except ValueError, e:
+        except (DeviceOfflineException, NotSentException) as e:
             return JsonResponse(
                 {"status": "error", "error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST)
@@ -63,8 +71,11 @@ class DeviceDo(generics.CreateAPIView):
         obj = self.get_object()
 
         if obj.device.online is False:
-            return ValueError('Device offline')
+            raise DeviceOfflineException('Device offline')
 
         published = send_message_from_api(
             obj.topic, serializer.validated_data['args'],
             serializer.validated_data['payload'])
+
+        if published is False:
+            raise NotSentException('Message not sent')

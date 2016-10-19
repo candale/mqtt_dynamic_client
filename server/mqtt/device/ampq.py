@@ -1,7 +1,5 @@
 from django.conf import settings
 
-from kombu import Connection
-
 
 def published(queue, data):
     with Connection(settings.MQTT_ACK_AMQP_CONNECTION_URL) as conn:
