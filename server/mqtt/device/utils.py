@@ -67,16 +67,17 @@ def send_message_from_api(topic, args, payload, timeout=0.7,
                           wait_for_received=True):
     '''
     Not the best implementation of this buut...it will do for now, I guess
+
+    This has to be modified to be making use of QoS or some unique  identifier
+    Concurrent messages to the same device may receive ack from one another.
     '''
     was_published = []
     was_recv = []
 
     def on_publish(client, userdata, mid):
-        print 'published'
         was_published.append(True)
 
     def on_msg(client, userdata, msg):
-        print 'received'
         if msg.payload == '+':
             was_recv.append(True)
 
@@ -96,16 +97,12 @@ def send_message_from_api(topic, args, payload, timeout=0.7,
     result, mid = mqtt_client.publish(build_topic(topic, args), payload)
 
     if result:
-        print 'failed'
         return False
 
     counter = 0
     while not ack_done() and counter < timeout:
         mqtt_client.loop(timeout=0.07)
         counter += 0.07
-
-    print 'loop done'
-    print 'counter', counter
 
     mqtt_client.disconnect()
 
