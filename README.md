@@ -1,4 +1,4 @@
-# MQTT RPC
+# MQTT RPC Client
 
 This project aims to facilitate the communication between a user and a 
 wireless enabled device.
